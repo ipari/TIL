@@ -1,0 +1,2 @@
+# note
+Personal knowledge repository
