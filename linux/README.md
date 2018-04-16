@@ -1,1 +1,32 @@
+# Linux
 
+## 목차
+
+- SSH Key
+  - 기존 SSH Key 추가
+
+
+## SSH Key
+
+### 기존 SSH Key 추가
+
+```
+$ eval $(ssh-agent)
+$ ssh-add ~/.ssh/id_rsa
+```
+
+그냥 추가하면 퍼미션 에러가 난다.  
+directory, public key, priviate key 여부에 따라 아래와 같이 설정해야 한다.  
+https://superuser.com/questions/215504/permissions-on-private-key-in-ssh-folder
+
+```
+$ chmod 700 ~/.ssh
+$ chmod 644 ~/.ssh/id_rsa.pub
+$ chmod 600 ~/.ssh/id_rsa
+```
+
+권한 설정 후에는 잘 된다.
+
+```
+$ ssh-add ~/.ssh/id_rsa
+```
