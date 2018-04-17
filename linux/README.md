@@ -4,6 +4,7 @@
 
 - SSH Key
   - 기존 SSH Key 추가
+  - 사이트 별 다른 키 사용
 
 
 ## SSH Key
@@ -29,4 +30,16 @@ $ chmod 600 ~/.ssh/id_rsa
 
 ```
 $ ssh-add ~/.ssh/id_rsa
+```
+
+### 사이트 별 다른 키 사용
+
+`~/.ssh/config` 파일을 아래와 같이 편집한다.
+
+```
+Host github.com
+  IdentityFile ~/.ssh/id_rsa_1
+
+Host gitlab.com
+  IdentityFile ~/.ssh/id_rsa_2
 ```
