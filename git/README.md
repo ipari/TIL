@@ -7,6 +7,7 @@
   - resolve conflict
   - interactive
 - reset
+- 문제 해결
 
 ## 초기 설정
 
@@ -52,4 +53,20 @@ git reset --hard HEAD~1
 `--amend` 커밋 취소
 ```
 git reset --soft HEAD@{1}
+```
+
+## 문제 해결
+
+### git 한글 파일명
+
+한글 파일명을 사용하면 아래와 같이 나오는 문제가 있다.
+
+```
+new file:   "_documents/\354\240\234\354\225\210\354\204\234.md"
+```
+
+경로가 영문이 아닌 경우 escape 하기 때문에 발생하는 문제로, 아래 명령어로 해당 기능을 끄면 된다.
+
+```
+$ git config --global core.quotepath false
 ```
