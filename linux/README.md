@@ -43,3 +43,12 @@ Host github.com
 Host gitlab.com
   IdentityFile ~/.ssh/id_rsa_2
 ```
+
+`~/.ssh/config` 파일의 권한이 맞지 않으면 에러가 발생한다.
+
+```
+$ git push origin develop
+Bad owner or permissions on /home/user_id/.ssh/config
+
+$ chmod 600 ~/.ssh/config
+```
