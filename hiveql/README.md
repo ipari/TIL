@@ -1,7 +1,10 @@
 # git
 
 ## 목차
-- 가이드
+- 유용한 사이트
+- UDAF
+- UDTF
+- 테이블 합치기
 
 
 ## 유용한 사이트
@@ -16,7 +19,7 @@
   - http://demo.gethue.com/hue
 
 
-## 예제
+## 기초
 
 ### `limit` 로 일부 출력
 스키마가 어떻게 생겼는지 확인하거나, 정렬 후 상위 n개를 출력할 때 사용한다.
@@ -35,6 +38,8 @@ limit 5
 | 2018-02-28 | b | 28 | quest | 250 |
 | 2018-02-28 | c | 82 | hunt | 28 |
 | 2018-02-28 | d | 22 | buy_item | -282 |
+
+## UDAF
 
 ### `group by` 로 집계하기
 
@@ -140,3 +145,113 @@ where player_level >= 10 and reason like 'buy_%'
 | `%_buy_%` | `_buy_` 가 어디든 있음 |
 
 기타 사용 가능한 [연산자](https://www.tutorialspoint.com/hive/hive_built_in_operators.htm) 목록.
+
+
+## UDTF
+
+### `struct` 다루기
+
+출력했을 때 데이터가 이런 식으로 출력되면 스키마의 구조를 봐야한다.
+
+| item |
+| --- |
+| [123456, sword, 10, Map(big -> 1, strong -> 3)] |
+| [211182, bow, 20, Map(long -> 4, tight -> 2, good -> 3)] |
+
+이런 스키마의 구조를 출력할 때 이렇게 나오면, 각각에 `item.id`, `item.level`, `item.tags` 와 같은 식으로 접근할 수 있다.
+
+```
+ItemCrafted: root
+ |-- item: struct (nullable = true)
+      |-- id: string (nullable = true)
+      |-- name: string (nullable = true)
+      |-- level: integer (nullable = true)
+      |-- tags: map (nullable = true)
+           |-- key: string
+           |-- value: integer (valueContainsNull = true)
+```
+
+제작된 아이템의 레벨 별 개수를 카운트한다고 치면 이런식으로 할 수 있다.
+
+```
+select
+    item.level,
+    count(*) as count
+from ItemCrafted
+group by item.level
+```
+
+### `explode`
+
+#### Array
+
+한 행에 여러 데이터가 있다면 `explode`를 통해 여러 열로 쪼갤 수 있다.
+
+| name | items |
+| --- | --- |
+| K | WrappedArray([돌날, 갈대, 열매]) |
+| X | WrappedArray([고기, 생선]) |
+
+```
+explode(items) as item
+```
+
+| name | item |
+| --- | --- |
+| K | 돌날 |
+| K | 갈대 |
+| K | 열매 |
+| X | 고기 |
+| X | 생선 |
+
+#### Key-Value
+
+만약 key-value 의 형태로 있다면, key와 value 에 해당하는 이름을 `as`로 넣어주면 된다.
+
+| item | tags |
+| --- | --- |
+| 고기 | Map(big -> 1, wet -> 1) |
+| 한조 | Map(bad -> 3)
+
+```
+explode(tags) as tag, level
+```
+
+| item | tag | level |
+| --- | --- | --- |
+| 고기 | big | 1 |
+| 고기 | wet | 1 |
+| 한조 | bad | 3 |
+
+#### 테이블 이름 지정
+
+`explode` 를 사용하면 새로운 테이블을 만든다. 새로 만든 열에 이름을 붙히듯, 새로 만든 테이블에도 이름을 붙힐 수 있다. 테이블 이름은 `as` 앞에 넣을 수 있으며 생략할 수 있다.
+
+```
+explode(items) {table_name} as items
+```
+
+### UDTF & `lateral view`
+`explode` 와 같이 테이블을 새로 만드는 함수들을 [UDTF](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF#LanguageManualUDF-Built-inTable-GeneratingFunctions(UDTF))(User Defined Table Function) 라고 한다.
+
+테이블을 새로 만드는 함수들에는 몇 가지 제약이 있다.
+
+- select 안에서 다른 표현을 사용할 수 없음
+  - `select id, explode(items) as item` 사용 불가
+- 중첩될 수 없음
+  - `explode(explode(lists))` 사용 불가
+- group by / cluster by / distribute by / sort by 사용할 수 없음
+  - `select explode(items) as item` … `group by item` 사용 불가
+
+그냥 그렇게 만들어져있기 때문인데, `lateral view` 를 사용하여 제약에서 벗어날 수 있다.
+
+```
+select
+    item.id,
+    item.level
+from ItemDumped lateral view explode(items) as item
+```
+
+## 테이블 합치기
+
+join 작성 예정
