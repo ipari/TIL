@@ -2,14 +2,18 @@
 
 ## 목차
 
-- Static 파일 읽기
+- 파일 읽기
+  - Static 폴더 내의 파일
+  - 일반 파일
 - Threading
 - mod_wsgi 한글 문제
 
 
-## Static 파일 읽기
+## 파일 읽기
 
-### 템플릿에서 읽기
+### Static 폴더 내의 파일
+
+#### 템플릿에서 읽기
 `url_for()` 를 활용한다.
 
 ```
@@ -17,7 +21,7 @@
 <img src="{{ url_for('static', filename=scene.image) }}" />
 ```
 
-### 코드에서 읽기
+#### 코드에서 읽기
 `app.static_folder()` 로 절대 경로를 구해야 한다.
 
 ```
@@ -27,6 +31,16 @@ def load():
     path = os.path.join(current_app.static_folder, 'blah.yml')
     with open(path, 'r') as f:
         return yaml.load(f)
+```
+
+### 일반 파일
+`app.open_resource()`로 아무 파일을 읽을 수 있다.  
+http://flask.pocoo.org/docs/1.0/api/#flask.Flask.open_resource
+
+```
+with app.open_resource('schema.sql') as f:
+    contents = f.read()
+    do_something_with(contents)
 ```
 
 
@@ -62,7 +76,7 @@ if __name__ == "__main__":
 ## mod_wsgi
 
 ### 디버깅
-공개 서버에서 디버그 모드를 다는 건 좋지 않지만 필요한 경우가 있다.
+공개 서버에서 디버그 모드를 다는 건 좋지 않지만 필요한 경우가 있다.  
 https://stackoverflow.com/questions/36208236/why-isnt-flask-giving-me-an-interactive-debugger
 
 아래 내용을 적당한 곳에 추가한다.
