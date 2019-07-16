@@ -19,3 +19,23 @@ def defaultdict_to_dict(d):
         d = [defaultdict_to_dict(d) for d in d]
     return d
 ```
+
+## 디버깅
+
+### Warning 잡기
+데이터 가공을 하다가 numpy에서 RuntimeWarning을 만났다. 왜 문제가 발생할까 찾아보니 데이터에 예외 케이스가 있어서 `0 / 0` 연산을 수행하면서 에러가 발생하던 것. `ZeroDivisionError`가 아닌 `RuntimeWarning: invalid value encountered in long_scalars` 를 띄워서 한참 헤맸다.
+
+※ 데이터 작업 때는 warning 이라도 무시하지 말고 짚고 넘어가도록 하자.
+
+```
+import warnings
+
+  with warnings.catch_warnings(record=True) as w:
+      warnings.simplefilter('error', RuntimeWarning)
+      
+      try:
+          func()
+      except RuntimeWarning:
+          import pdb
+          pdb.set_trace()
+```
