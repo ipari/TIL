@@ -52,3 +52,11 @@ Bad owner or permissions on /home/user_id/.ssh/config
 
 $ chmod 600 ~/.ssh/config
 ```
+
+## Etc.
+### `sudo apt-get update` 안될 때
+https://askubuntu.com/questions/760574/sudo-apt-get-update-failes-due-to-hash-sum-mismatch
+```
+sudo apt-get clean
+sudo rm -r /var/lib/apt/lists/*
+```
